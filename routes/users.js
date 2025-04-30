@@ -11,6 +11,6 @@ const router = express.Router()
 //   logger
 // })
 
-router.post('/signup', usersController.postSignup)
+router.post('/signup',postSignup)
 
 module.exports = router
