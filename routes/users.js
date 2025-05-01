@@ -1,6 +1,6 @@
 const express = require('express')
 
-const usersController = require('../controllers/users')
+const postSignup = require('../controllers/users')
 const router = express.Router()
 // const config = require('../config/index')
 // const { dataSource } = require('../db/data-source')
