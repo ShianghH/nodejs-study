@@ -9,8 +9,6 @@ jobs:
     steps:
     - name: Checkout to Repo Directory
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
     - name: Use Node.js 20
       uses: actions/setup-node@v4
       with:
