@@ -1,4 +1,5 @@
 const express = require('express')
+// 建立一個路由模組實例，用來掛載對應的 HTTP 方法（GET、POST 等）
 const router = express.Router()
 
 const {

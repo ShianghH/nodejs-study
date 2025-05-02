@@ -1,5 +1,5 @@
 const {dataSource} = require('../db/data-source')// 用來對資料庫做查詢、存取等操作
-const logger = require('../utils/logger')('Users')// 建立 logger 實例，標記這份 log 是來自 Users
+const logger = require('../utils/logger')('UsersController')// 建立 logger 實例，標記這份 log 是來自 Users
 const config = require('../config/index') // 引入自訂的設定管理器，集中管理 db/web/secret 等設定
 const bcrypt = require('bcrypt')// 引入 bcrypt 套件，用來加密密碼（雜湊處理）
 const generateJWT = require('../utils/generateJWT')// 引入自訂的 JWT 產生器，用來簽發登入後的 JSON Web Token
@@ -79,7 +79,7 @@ const postSignup = async (req,res,next) =>{
   }
 }
 
-//const postSignin = async (req,res,next) => {
+const postSignin = async (req,res,next) => {
   try {
     const { email, password } = req.body
     if( isUndefined (email) || isNotValidString (email) || !emailPattern.test(email)|| isUndefined(password)|| isNotValidString(password)){
@@ -90,15 +90,68 @@ const postSignup = async (req,res,next) =>{
       })
       return
     }
+    if (!passwordPattern.test(password)){
+      logger.warn('密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長32個字')
+      res.status(400).json({
+        status: 'failed',
+        message: '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長32個字'
+      })
+      return
+    }
+    // 取得 users 資料表的 Repository，用來查詢或操作使用者資料
+    const userRepository = dataSource.getRepository('users')
+    // 查詢是否已有該 email 的使用者（只取 id、name、password 三個欄位）
+    const existingUser = await userRepository.findOne({
+      select: ['id','name','password'],
+      where : {email}
+    })
+    if(!existingUser){
+      res.status(400).json({
+        status : 'failed',
+        message: '使用者不存在或密碼輸入錯誤'
+      })
+      return
+    }
+    // 輸出查詢到的使用者資料（用於 debug）
+    logger.info(`使用者資料: ${JSON.stringify(existingUser)}`)
+    // 比對使用者輸入的明文密碼與資料庫中加密後的密碼是否一致
+    const isMach = await bcrypt.compare(password,existingUser.password)
+    if(!isMach){
+      res.status(400).json({
+        status : 'failed',
+        message : '使用者不存在或密碼輸入錯誤'
+      })
+      return
+    }
+    // 產生 JWT（JSON Web Token）作為登入憑證
+    const token = await generateJWT({
+      id: existingUser.id // 放入要簽名的 payload（通常是 user id）
+    },config.get('secret.jwtSecret') // 簽名用的密鑰（從設定檔中讀取） 
+    ,{
+      // token 有效期限，例如 '7d'
+      expiresIn: `${config.get('secret.jwtExpiresDay')}`
+    })
+    res.status(201).json({
+      status : 'success',
+      message : '登入成功',
+      data :{
+        token,
+        user:{
+          name: existingUser.name
+        }
+      }
+    })
+
   } catch (error) {
-    
+    logger.error('登入錯誤:', error)
+    next(error)
   }
-//}
+}
 
 
 
 
 module.exports = { 
   postSignup,
-  //postSignin
+  postSignin
 }
