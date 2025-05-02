@@ -79,7 +79,7 @@ const postSignup = async (req,res,next) =>{
   }
 }
 
-const postSignin = async (req,res,next) => {
+//const postSignin = async (req,res,next) => {
   try {
     const { email, password } = req.body
     if( isUndefined (email) || isNotValidString (email) || !emailPattern.test(email)|| isUndefined(password)|| isNotValidString(password)){
@@ -93,12 +93,12 @@ const postSignin = async (req,res,next) => {
   } catch (error) {
     
   }
-}
+//}
 
 
 
 
 module.exports = { 
   postSignup,
-  postSignin
+  //postSignin
 }
