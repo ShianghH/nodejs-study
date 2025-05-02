@@ -79,7 +79,26 @@ const postSignup = async (req,res,next) =>{
   }
 }
 
+const postSignin = async (req,res,next) => {
+  try {
+    const { email, password } = req.body
+    if( isUndefined (email) || isNotValidString (email) || !emailPattern.test(email)|| isUndefined(password)|| isNotValidString(password)){
+      logger.warn('欄位未填寫正確')
+      res.status(400).json({
+        status : 'failed',
+        message: '欄位未填寫正確'
+      })
+      return
+    }
+  } catch (error) {
+    
+  }
+}
 
 
 
-module.exports = postSignup
+
+module.exports = { 
+  postSignup,
+  postSignin
+}

@@ -1,7 +1,11 @@
 const express = require('express')
-
-const postSignup = require('../controllers/users')
 const router = express.Router()
+
+const {
+    postSignup,
+    postSignin
+
+} = require('../controllers/users')
 // const config = require('../config/index')
 // const { dataSource } = require('../db/data-source')
 // const logger = require('../utils/logger')('Users')
@@ -12,5 +16,6 @@ const router = express.Router()
 // })
 
 router.post('/signup',postSignup)
+router.post('/signin',postSignin)
 
 module.exports = router
