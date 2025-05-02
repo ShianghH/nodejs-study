@@ -100,5 +100,5 @@ const postSignin = async (req,res,next) => {
 
 module.exports = { 
   postSignup,
-  
+  postSignin
 }
