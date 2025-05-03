@@ -13,29 +13,14 @@ describe(`GET ${route}`, () => {
   let categoryName
   beforeAll(async () => {
     server = await TestServer.getServer()
-  
-    const categoryRepo = dataSource.getRepository('product_categories')
-    const productRepo = dataSource.getRepository('products')
-  
-    const category = categoryRepo.create({ name: '測試分類' })
-    await categoryRepo.save(category)
-  
-    const product = productRepo.create({
-      name: '測試商品',
-      description: '這是一個測試商品',
-      image_url: 'https://example.com/test.jpg',
-      origin_price: 999,
-      price: 888,
-      colors: JSON.stringify(['紅色', '藍色']),  // 👈 新增
-      spec: JSON.stringify(['A型', 'B型']),      // 👈 新增
-      enable: true,
-      product_categories: category
-    })
-    await productRepo.save(product)
-  
-    categoryName = category.name
+    const getCategories = await server
+      .get('/api/v1/category')
+      .query({ page: 1 })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+    categoryName = getCategories.body.data[0].name
   })
-  
   beforeEach(() => {
     jest.clearAllMocks()
   })
