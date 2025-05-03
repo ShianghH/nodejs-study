@@ -6,6 +6,7 @@ const pinoHttp = require('pino-http')
 const logger = require('./utils/logger')('App')
 const usersRouter = require('./routes/users')
 const adminRouter = require('./routes/admin')
+const productRouter = require('./routes/products')
 
 const app = express()
 app.use(cors())
@@ -27,7 +28,9 @@ app.get('/healthcheck', (req, res) => {
   res.send('OK')
 })
 app.use('/api/v1/users', usersRouter)
-app.use('/api/v1/admin',adminRouter)
+app.use('/api/v1/admin', adminRouter)
+app.use('/api/v1/products',productRouter)
+
 
 app.use((err, req, res, next) => {
   req.log.error(err)
