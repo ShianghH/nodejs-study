@@ -113,8 +113,70 @@ const getProducts = async (req,res,next) =>{
     }
 }
 
+const getProductDtail = async (res,req,next) =>{
+    try {
+        // 從 req.params 中取出路由參數 products_id，並重新命名為 productId，方便後續使用
+        const { product_id: productId} = req.params
+        if(isUndefined(productID) || isNotValidString(productID) ){
+            res.status(400).json({
+                status : 'failed',
+                message : '欄位未填寫正確'
+            })
+            return
+        }
+        const productDtail = await dataSource.getRepository('products').findOne({
+            select:{
+                id: true,
+                name: true,
+                description: true,
+                image_url: true,
+                origin_price: true,
+                price: true,
+                colors: true,
+                spec: true,
+                product_categories:{
+                    name: true
+                }
+            },
+            //這一筆要根據 id 來查
+            where:{ id: productId  },
+            //這筆產品有跟分類表做關聯，把分類資料也查出來
+            relations : {
+                product_categories: true
+            }
+        })
+        const productLinkTag = await dataSource.getRepository('product_link_tags').fine({
+            select:{
+                id: true,
+                name: true
+            },
+            where: {product_id: productId },
+            relations:{
+                product_tag: true
+            }
+        })
+        logger.info(`productDetail: ${JSON.stringify(productDetail, null, 1)}`)
+        logger.info(`productLinkTag: ${JSON.stringify(productLinkTag, null, 1)}`)
+        res.status(200).json({
+            status:'success',
+            message:'成功',
+            data:{
+                id: productDtail.id,
+                category: productDtail.product_categories.name,
+                tag: productLinkTag.
+            }
+        })
+
+
+
+    } catch (error) {
+        
+    }
+}
+
 
 
 module.exports = {
-    getProducts
+    getProducts,
+    getProductDtail
 }

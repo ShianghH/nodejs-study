@@ -13,13 +13,11 @@ describe(`GET ${route}`, () => {
   let categoryName
   beforeAll(async () => {
     server = await TestServer.getServer()
-    const getCategories = await server
-      .get('/api/v1/category')
-      .query({ page: 1 })
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-    categoryName = getCategories.body.data[0].name
+    // 👇 建立預設分類（避免 category 為空）
+    const defaultCategoryName = `測試分類-${Date.now()}`
+    const categoryRepo = dataSource.getRepository('product_categories')
+    await categoryRepo.save(categoryRepo.create({ name: defaultCategoryName }))
+    categoryName = defaultCategoryName
   })
   beforeEach(() => {
     jest.clearAllMocks()
