@@ -2,12 +2,12 @@ const {dataSource} = require('../db/data-source')
 const logger = require('../utils/logger')('ProductsController')
 const { IsNull } = require('typeorm')
 
-
 const {
     isUndefined,
     isNotValidString,
     isNotValidInteger
 } = require('../utils/validators')
+
 
 const numberReg = /^[0-9]+$/   //檢查一段字串是不是「只包含數字」
 
@@ -113,18 +113,19 @@ const getProducts = async (req,res,next) =>{
     }
 }
 
-const getProductDtail = async (res,req,next) =>{
+
+const getProductDetail = async (req,res,next) =>{
     try {
         // 從 req.params 中取出路由參數 products_id，並重新命名為 productId，方便後續使用
-        const { product_id: productId} = req.params
-        if(isUndefined(productID) || isNotValidString(productID) ){
+        const { products_id: productId} = req.params
+        if(isUndefined(productId) || isNotValidString(productId) ){
             res.status(400).json({
                 status : 'failed',
                 message : '欄位未填寫正確'
             })
             return
         }
-        const productDtail = await dataSource.getRepository('products').findOne({
+        const productDetail = await dataSource.getRepository('products').findOne({
             select:{
                 id: true,
                 name: true,
@@ -139,38 +140,48 @@ const getProductDtail = async (res,req,next) =>{
                 }
             },
             //這一筆要根據 id 來查
-            where:{ id: productId  },
+            where:{ id: productId },
             //這筆產品有跟分類表做關聯，把分類資料也查出來
             relations : {
                 product_categories: true
             }
         })
-        const productLinkTag = await dataSource.getRepository('product_link_tags').fine({
+        const productLinkTag = await dataSource.getRepository('product_link_tags').find({
             select:{
-                id: true,
-                name: true
+                product_tags:{
+                    id: true,
+                    name: true
+                }
             },
-            where: {product_id: productId },
+            where: { products_id: productId },
             relations:{
-                product_tag: true
+                product_tags: true
             }
         })
         logger.info(`productDetail: ${JSON.stringify(productDetail, null, 1)}`)
         logger.info(`productLinkTag: ${JSON.stringify(productLinkTag, null, 1)}`)
         res.status(200).json({
             status:'success',
-            message:'成功',
+            message:'成功',                                                
             data:{
-                id: productDtail.id,
-                category: productDtail.product_categories.name,
-                tag: productLinkTag.
+                id: productDetail.id,
+                category: productDetail.product_categories.name,
+                //從 productLinkTag 陣列中，抽出每個元素裡面的 product_tags 欄位值，重新命名成 productTags
+                tags: productLinkTag.map(({product_tags:ProductTags}) => ProductTags),
+                name: productDetail.name,
+                description: productDetail.description,
+                image_url: productDetail.image_url,
+                origin_price: productDetail.origin_price,
+                price: productDetail.price,
+                //「JSON 格式的字串」轉換成 JavaScript 可以操作的資料結構
+                colors: JSON.parse(productDetail.colors),
+                spec: JSON.parse(productDetail.spec)
             }
         })
-
-
-
     } catch (error) {
-        
+        console.error('錯誤訊息:', error) // <-- 先加這行
+        logger.error(error)
+        next(error)
     }
 }
 
@@ -178,5 +189,5 @@ const getProductDtail = async (res,req,next) =>{
 
 module.exports = {
     getProducts,
-    getProductDtail
+    getProductDetail
 }
