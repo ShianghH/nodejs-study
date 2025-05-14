@@ -6,6 +6,8 @@ const Products = require('../entities/Products')
 const ProductCategories = require('../entities/ProductCategories')
 const ProductTags = require('../entities/ProductTags')
 const ProductLinkTags = require('../entities/ProductLinkTags')
+const Orders = require('../entities/Orders')
+const OrderLinkProducts = require('../entities/OrderLinkProducts')
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -16,7 +18,7 @@ const dataSource = new DataSource({
   database: config.get('db.database'),
   synchronize: config.get('db.synchronize'),
   poolSize: 10,
-  entities: [Users, ProductCategories, ProductTags, Products, ProductLinkTags],
+  entities: [Users, ProductCategories, ProductTags, Products, ProductLinkTags, Orders,OrderLinkProducts],
   ssl: config.get('db.ssl')
 })
 
