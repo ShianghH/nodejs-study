@@ -103,7 +103,6 @@ const postOrder = async (req,res,next) => {
             message: '加入成功'
         })
     } catch (error) {
-        console.error('錯誤訊息:', error)
         logger.error(error)
         next(error)
     }
