@@ -14,6 +14,7 @@ const {
 //   secret: config.get('secret').jwtSecret,
 //   userRepository: dataSource.getRepository('users'),
 //   logger
+//test
 // })
 
 router.post('/signup',postSignup)
