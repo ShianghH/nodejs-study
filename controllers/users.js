@@ -14,8 +14,6 @@ const {
   isNotValidInteger,
 } = require("../utils/validators");
 
-const { Users } = require("../entities/Users");
-
 //從 firebase-admin 引入 FCM 通知模組，用於發送推播訊息給裝置（Web/App）
 const { messaging } = require("firebase-admin");
 
@@ -53,7 +51,7 @@ const postSignup = async (req, res, next) => {
     }
 
     //取得對應 'users' entity 的資料存取物件（Repository）
-    const userRepository = dataSource.getRepository(Users);
+    const userRepository = dataSource.getRepository("users");
 
     //查詢資料庫中是否已存在相同 email 的使用者（用於註冊驗證）
     const existingUser = await userRepository.findOne({
@@ -122,7 +120,7 @@ const postSignin = async (req, res, next) => {
       return;
     }
     // 取得 users 資料表的 Repository，用來查詢或操作使用者資料
-    const userRepository = dataSource.getRepository(User);
+    const userRepository = dataSource.getRepository("users");
     // 查詢是否已有該 email 的使用者（只取 id、name、password 三個欄位）
     const existingUser = await userRepository.findOne({
       select: ["id", "name", "password"],

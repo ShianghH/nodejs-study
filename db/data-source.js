@@ -1,7 +1,7 @@
 const { DataSource } = require("typeorm");
 const config = require("../config/index");
 
-const { Users } = require("./entities/Users");
+const Users = require("../entities/Users");
 const Products = require("../entities/Products");
 const ProductCategories = require("../entities/ProductCategories");
 const ProductTags = require("../entities/ProductTags");
@@ -26,17 +26,8 @@ const dataSource = new DataSource({
     ProductLinkTags,
     Orders,
     OrderLinkProducts,
-  ].filter(Boolean), // ⚠️ 避免 undefined 造成崩潰
+  ],
   ssl: config.get("db.ssl"),
-});
-console.log("[DEBUG][Entity]", {
-  Users,
-  ProductCategories,
-  ProductTags,
-  Products,
-  ProductLinkTags,
-  Orders,
-  OrderLinkProducts,
 });
 
 module.exports = { dataSource };
