@@ -5,8 +5,6 @@ const bcrypt = require("bcrypt"); // 引入 bcrypt 套件，用來加密密碼�
 const generateJWT = require("../utils/generateJWT"); // 引入自訂的 JWT 產生器，用來簽發登入後的 JSON Web Token
 const passwordPattern = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,32}/; // 密碼格式規則：需包含至少一個數字、一個大寫、一個小寫，長度 8-32 字元
 
-const { Users } = require("../entities/Users");
-
 // Email 格式驗證規則：
 // 必須包含帳號@網域，帳號允許英數字 + 特定符號，網域支援 .com / .org 等結尾
 const emailPattern = /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/;
@@ -53,7 +51,7 @@ const postSignup = async (req, res, next) => {
     }
 
     //取得對應 'users' entity 的資料存取物件（Repository）
-    const userRepository = dataSource.getRepository(Users);
+    const userRepository = dataSource.getRepository("users");
 
     //查詢資料庫中是否已存在相同 email 的使用者（用於註冊驗證）
     const existingUser = await userRepository.findOne({
@@ -122,7 +120,7 @@ const postSignin = async (req, res, next) => {
       return;
     }
     // 取得 users 資料表的 Repository，用來查詢或操作使用者資料
-    const userRepository = dataSource.getRepository(Users);
+    const userRepository = dataSource.getRepository("users");
     // 查詢是否已有該 email 的使用者（只取 id、name、password 三個欄位）
     const existingUser = await userRepository.findOne({
       select: ["id", "name", "password"],
