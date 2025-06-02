@@ -13,10 +13,10 @@ const db = require("./db");
 const web = require("./web");
 const secret = require("./secret");
 
-// 如果 dotenv 載入失敗，就直接拋出錯誤，讓程式停止
-if (result.error) {
-  throw result.error;
-}
+// // 如果 dotenv 載入失敗，就直接拋出錯誤，讓程式停止
+// if (result.error) {
+//   throw result.error;
+// }
 // 將所有設定集合成一個物件，供後續使用
 const config = {
   db,
