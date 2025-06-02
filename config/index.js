@@ -1,16 +1,13 @@
 const dotenv = require("dotenv"); //載入 dotenv，用來讀取 .env 環境變數檔案
 
-// Render 上的 Secret File 路徑：/etc/secrets/.env
-const envPath = process.env.RENDER ? "/etc/secrets/.env" : ".env";
+// 本地開發使用 .env，Render 則靠環境變數，不讀檔
+const result = dotenv.config();
 
-const result = dotenv.config({ path: envPath });
-
-// 如果 dotenv 載入失敗，就直接拋出錯誤，讓程式停止
-if (result.error) {
+if (result.error && !process.env.RENDER) {
+  console.error("[dotenv] ❌ 無法讀取 .env：", result.error);
   throw result.error;
 }
 
-// const result = dotenv.config(); // 執行 dotenv 設定讀取
 // // 載入自訂的三個設定檔：資料庫設定、網站設定、機密資料
 const db = require("./db");
 const web = require("./web");
