@@ -19,6 +19,9 @@ const { messaging } = require("firebase-admin");
 
 const postSignup = async (req, res, next) => {
   try {
+    if (!dataSource.isInitialized) {
+      await dataSource.initialize();
+    }
     // 從請求主體中解構取得使用者輸入的 name、email、password 欄位
     const { name, email, password } = req.body;
     if (
@@ -93,6 +96,9 @@ const postSignup = async (req, res, next) => {
 
 const postSignin = async (req, res, next) => {
   try {
+    if (!dataSource.isInitialized) {
+      await dataSource.initialize();
+    }
     const { email, password } = req.body;
     if (
       isUndefined(email) ||
