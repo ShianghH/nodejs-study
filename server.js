@@ -1,8 +1,5 @@
 const app = require("./app");
-
 const { dataSource } = require("./db/data-source");
-
-//初始化資料庫，成功後再啟動伺服器
 
 (async () => {
   try {
