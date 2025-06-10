@@ -24,12 +24,12 @@ console.log("[Render][app] middleware 載入中...");
 app.use(
   pinoHttp({
     logger,
-    serializers: {
-      req(req) {
-        req.body = req.raw.body;
-        return req;
-      },
-    },
+    // serializers: {
+    //   req(req) {
+    //     req.body = req.raw.body;
+    //     return req;
+    //   },
+    // },
   })
 );
 console.log("[Render][app] logger middleware 載入完成");
@@ -48,6 +48,7 @@ app.use("/api/v1/orders", orderRouter);
 
 console.log("[Render][app] 所有 API route 註冊完成");
 
+//全域錯誤處理 middleware
 app.use((err, req, res, next) => {
   req.log.error(err);
   if (err.status) {
@@ -57,7 +58,7 @@ app.use((err, req, res, next) => {
     return;
   }
   res.status(500).json({
-    message: "伺服器錯誤",
+    message: "伺服器錯誤，請稍後再試",
   });
 });
 

@@ -44,6 +44,7 @@ const postSignup = async (req, res, next) => {
         "建立使用者錯誤: 密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長32個字"
       );
       res.status(400).json({
+        status: "failed",
         message:
           "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長32個字",
       });
@@ -81,9 +82,18 @@ const postSignup = async (req, res, next) => {
     const savedUser = await userRepository.save(newUser);
     // 輸出日誌：記錄成功建立使用者的 ID
     logger.info("新建立的使用者ID:", savedUser.id);
-    res.status(201).json({
+    res.status(200).json({
       status: "success",
       message: "註冊成功",
+      date: {
+        user: {
+          id: savedUser.id,
+          name: savedUser.name,
+          email: savedUser.email,
+          created_at: savedUser.created_at,
+          updated_at: savedUser.updated_at,
+        },
+      },
     });
   } catch (error) {
     logger.error("建立使用者錯誤:", error);
@@ -123,11 +133,11 @@ const postSignin = async (req, res, next) => {
     const userRepository = dataSource.getRepository("users");
     // 查詢是否已有該 email 的使用者（只取 id、name、password 三個欄位）
     const existingUser = await userRepository.findOne({
-      select: ["id", "name", "password"],
       where: { email },
+      select: ["id", "name", "password", "email"],
     });
     if (!existingUser) {
-      res.status(400).json({
+      res.status(401).json({
         status: "failed",
         message: "使用者不存在或密碼輸入錯誤",
       });
@@ -138,7 +148,7 @@ const postSignin = async (req, res, next) => {
     // 比對使用者輸入的明文密碼與資料庫中加密後的密碼是否一致`
     const isMach = await bcrypt.compare(password, existingUser.password);
     if (!isMach) {
-      res.status(400).json({
+      res.status(401).json({
         status: "failed",
         message: "使用者不存在或密碼輸入錯誤",
       });
@@ -155,13 +165,15 @@ const postSignin = async (req, res, next) => {
         expiresIn: `${config.get("secret.jwtExpiresDay")}`,
       }
     );
-    res.status(201).json({
+    res.status(200).json({
       status: "success",
       message: "登入成功",
+      token,
       data: {
-        token,
         user: {
+          id: existingUser.id,
           name: existingUser.name,
+          email: existingUser.email,
         },
       },
     });

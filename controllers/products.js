@@ -13,6 +13,7 @@ const numberReg = /^[0-9]+$/; //檢查一段字串是不是「只包含數字」
 
 const getProducts = async (req, res, next) => {
   try {
+    //從網址上的查詢參數拿 page 跟 category，如果沒填，預設page是第1頁，category 預設是空字串
     const { page = 1, category = "" } = req.query;
     if (
       !numberReg.test(page) ||
@@ -22,7 +23,7 @@ const getProducts = async (req, res, next) => {
     ) {
       res.status(400).json({
         status: "failed",
-        message: "頁數輸入錯誤",
+        message: "請輸入有效的頁數",
       });
       return;
     }
@@ -34,6 +35,7 @@ const getProducts = async (req, res, next) => {
 
     let productCategory; //宣告一個可以重新賦值的變數
 
+    // 如果有傳入分類，就查看看有沒有這個分類
     if (category !== "") {
       productCategory = await dataSource
         .getRepository("product_categories")
@@ -58,7 +60,7 @@ const getProducts = async (req, res, next) => {
     };
     if (productCategory) {
       // 若使用者有指定分類，將分類 ID 加入查詢條件
-      // 讓只查詢該分類底下的產品資料
+      // 只查詢該分類底下的產品資料
       productWhereOptions.product_categories_id = productCategory.id;
     }
     const products = await dataSource.getRepository("products").find({
@@ -72,7 +74,7 @@ const getProducts = async (req, res, next) => {
         price: true,
         created_at: true,
         product_categories: {
-          name: true, // 關聯分類資料中，只取 name 欄位
+          id: true,
         },
       },
       // 設定查詢條件，例如：未被刪除、有指定分類的產品
@@ -99,15 +101,10 @@ const getProducts = async (req, res, next) => {
       status: "success",
       message: "成功",
       data: {
-        pagination: {
-          current_page: pageToInt, // 當前頁碼（來自 req.query）
-          total_page: Math.ceil(total / perPage), // 總頁數（總筆數 / 每頁筆數，無條件進位）
-        },
         products: products.map(
           ({
             id,
             name,
-            description,
             image_url: imageUrl,
             origin_price: originPrice,
             price,
@@ -115,13 +112,18 @@ const getProducts = async (req, res, next) => {
           }) => ({
             id,
             name,
-            category: productCategories.name, // 把分類物件拉平，只取分類名稱
-            description,
+            category_id: productCategories.id, // 把分類物件拉平，只取分類名稱
+            price,
             image_url: imageUrl,
             origin_price: originPrice,
-            price,
           })
         ),
+        pagination: {
+          total,
+          page: pageToInt, // 當前頁碼（來自 req.query）
+          limit: perPage,
+          total_page: Math.ceil(total / perPage), // 總頁數（總筆數 / 每頁筆數，無條件進位）
+        },
       },
     });
   } catch (error) {
@@ -139,7 +141,7 @@ const getProductDetail = async (req, res, next) => {
       isNotValidString(productId) ||
       isNotValidUUID(productId)
     ) {
-      res.status(200).json({
+      res.status(400).json({
         status: "failed",
         message: "欄位未填寫正確",
       });
@@ -158,6 +160,8 @@ const getProductDetail = async (req, res, next) => {
         product_categories: {
           name: true,
         },
+        created_at: true,
+        updated_at: true,
       },
       //根據 id 來查
       where: { id: productId },
@@ -167,9 +171,9 @@ const getProductDetail = async (req, res, next) => {
       },
     });
     if (!productDetail) {
-      return res.status(200).json({
+      return res.status(404).json({
         status: "failed",
-        message: "找不到該產品",
+        message: "商品ID不存在",
       });
     }
 
@@ -194,19 +198,21 @@ const getProductDetail = async (req, res, next) => {
       message: "成功",
       data: {
         id: productDetail.id,
+        name: productDetail.name,
         category: productDetail.product_categories.name,
+        price: productDetail.price,
+        origin_price: productDetail.origin_price,
         //從 productLinkTag 陣列中，抽出每個元素裡面的 product_tags 欄位值，重新命名成 productTags
         tags: productLinkTag.map(
           ({ product_tags: ProductTags }) => ProductTags
         ),
-        name: productDetail.name,
         description: productDetail.description,
         image_url: productDetail.image_url,
-        origin_price: productDetail.origin_price,
-        price: productDetail.price,
         //「JSON 格式的字串」轉換成 JavaScript 可以操作的資料結構
         colors: JSON.parse(productDetail.colors),
         spec: JSON.parse(productDetail.spec),
+        created_at: productDetail.created_at,
+        updated_at: productDetail.updated_at,
       },
     });
   } catch (error) {

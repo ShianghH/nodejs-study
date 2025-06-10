@@ -1,91 +1,91 @@
-const { EntitySchema } = require('typeorm')
+const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
-  name: 'products',
-  tableName: 'products',
+  name: "products",
+  tableName: "products",
   columns: {
     id: {
       primary: true,
-      type: 'uuid',
-      generated: 'uuid',
-      nullable: false
+      type: "uuid",
+      generated: "uuid",
+      nullable: false,
     },
     product_categories_id: {
-      type: 'smallint',
-      nullable: false
+      type: "smallint",
+      nullable: false,
     },
     name: {
-      type: 'varchar',
+      type: "varchar",
       length: 50,
       nullable: false,
-      unique: true
+      unique: true,
     },
     description: {
-      type: 'text',
-      nullable: false
+      type: "text",
+      nullable: false,
     },
     image_url: {
-      type: 'varchar',
+      type: "varchar",
       length: 2048,
-      nullable: false
+      nullable: false,
     },
     origin_price: {
-      type: 'integer',
-      nullable: false
+      type: "integer",
+      nullable: false,
     },
     price: {
-      type: 'integer',
-      nullable: false
+      type: "integer",
+      nullable: false,
     },
     colors: {
-      type: 'varchar',
+      type: "varchar",
       length: 100,
-      nullable: false
+      nullable: false,
     },
     spec: {
-      type: 'varchar',
+      type: "varchar",
       length: 100,
-      nullable: false
+      nullable: false,
     },
     enable: {
-      type: 'bool',
-      nullable: false
+      type: "bool",
+      nullable: false,
     },
     created_at: {
-      type: 'timestamp',
+      type: "timestamp",
       createDate: true,
-      nullable: false
+      nullable: false,
     },
     updated_at: {
-      type: 'timestamp',
+      type: "timestamp",
       updateDate: true,
-      nullable: false
+      nullable: false,
     },
     deleted_at: {
-      type: 'timestamp',
-      nullable: true
-    }
+      type: "timestamp",
+      nullable: true,
+    },
   },
   relations: {
     product_categories: {
-      target: 'product_categories',
-      type: 'many-to-one',
+      target: "product_categories",
+      type: "many-to-one",
       joinColumn: {
-        name: 'product_categories_id',
-        referencedColumnName: 'id',
-        foreignKeyConstraintName: 'products_fk_product_categories'
-      }
+        name: "product_categories_id",
+        referencedColumnName: "id",
+        foreignKeyConstraintName: "products_fk_product_categories",
+      },
     },
     product_link_tags: {
-      target: 'product_link_tags',
-      type: 'one-to-many',
-      inverseSide: 'products',
+      target: "product_link_tags",
+      type: "one-to-many",
+      inverseSide: "products",
       joinColumn: {
-        name: 'id',
-        referencedColumnName: 'products_id',
-        foreignKeyConstraintName: 'products_fk_product_link_tags'
+        name: "id",
+        referencedColumnName: "products_id",
+        foreignKeyConstraintName: "products_fk_product_link_tags",
       },
-      cascade: false
-    }
-  }
-})
+      cascade: false,
+    },
+  },
+});
