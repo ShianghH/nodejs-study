@@ -92,6 +92,21 @@ const postOrder = async (req, res, next) => {
       });
       return;
     }
+    const productRepo = dataSource.getRepository("products");
+
+    // 驗證每個 orders 裡的 products_id 是否存在
+    for (const order of orders) {
+      const exist = await productRepo.exist({
+        where: { id: order.products_id },
+      });
+      if (!exist) {
+        logger.warn(`找不到產品 ID: ${order.products_id}`);
+        return res.status(400).json({
+          status: "failed",
+          message: "找不到產品 ID",
+        });
+      }
+    }
 
     //將剛剛建立好的訂單（newOrder）裡，每一個商品（orders）都寫入到 order_link_products 資料表裡
     const orderLinkProductRepository = dataSource.getRepository(
